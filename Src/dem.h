@@ -9,6 +9,8 @@ class Vec2{
 	void set(double*);	
 	Vec2 times(double);	
 	Vec2 div(double);	
+	void times_me(double);	
+	void div_me(double);	
 	double len();
 	void print();
 	private:
@@ -17,6 +19,8 @@ double iprod(Vec2 a,Vec2 b);
 double iprod(double a[2], double b[2]);
 Vec2 vsum(Vec2 a, Vec2 b);
 Vec2 vdiff(Vec2 a, Vec2 b);
+void vsum(Vec2 a, Vec2 b, Vec2 c);
+void vdiff(Vec2 a, Vec2 b, Vec2 c);
 
 class MatTriDiag{	// triple diagonal matrix
 	public:
@@ -50,6 +54,7 @@ class Curve2D{	// plane (2D) curve
 		double dxds(double s); // interpolate dx/ds 
 		double dyds(double s); // interpolate dy/ds
 		void smooth(int nsmp2);
+		~Curve2D();
 	private:
 	protected:
 };

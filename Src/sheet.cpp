@@ -281,6 +281,15 @@ void SHEET::xy2crv(REV rev, PRTCL *PTC){
 		PTC[ipt].nx[1]=xf.x[1];
 		//printf("%lf %lf\n",PTC[ipt].nx[0],PTC[ipt].nx[1]);
 	}
+
+	free(crv.x);
+	free(crv.y);
+	free(crv.bx);
+	free(crv.cx);
+	free(crv.dx);
+	free(crv.by);
+	free(crv.cy);
+	free(crv.dy);
 /*
 	Vec2 yf0,yf1;
 	yf0.set(PTC[list[0]].x);	

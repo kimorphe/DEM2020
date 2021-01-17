@@ -156,7 +156,8 @@ int move_water2(
 	for(iside=0;iside<2;iside++){
 		isds[0]=iside;
 		ni.set(PTC[ipt].nx);		
-		if(iside==1) ni.times(-1.0);
+		if(iside==1) ni=ni.times(-1.0);
+		//if(iside==1) ni.times_me(-1.0);
 
 		//irnd=RndI(mt);
 		ipts[1]=RndI(mt);
@@ -168,6 +169,7 @@ int move_water2(
 			xpj.set(PTC[ipts[1]].x);
 
 			rij=vdiff(xpj,xpi);
+			//vdiff(xpj,xpi,rij);
 
 			rr=rij.len();
 			//rx=x1[0]-x2[0];
@@ -222,6 +224,10 @@ int add_water(
 	double dUh;
 	double sig_now;
 	//for(ipt=0;ipt<2*np;ipt++){
+	double mu=0.2,dG;
+	double sig0=0.9,sigb=1.1;
+	mu*=log(2.)/(sigb-sig0)*prms.UE0;
+
 	for(ipt=0;ipt<nmc;ipt++){
 		irnd=RndI(mt);	
 		ip=irnd/2; // particle number
@@ -231,7 +237,8 @@ int add_water(
 		dUE=VarUE_mu(rev,sbcll,PTC,prms.iprd,prms.sig,prms.Eps,ip,iside,dsig*isgn); //*2.*prms.Eps0;
 		sig_now=PTC[ip].sigs[iside];
 		dUh=Uhyd_sig(prms.UE0,sig_now+dsig*isgn)-Uhyd_sig(prms.UE0,sig_now);
-		if(dUE+dUh < 0.0){
+		dG=mu*dsig*isgn;
+		if(dUE+dUh+dG < 0.0){
 			//PTC[ip].sigs[iside]+=(dsig*isgn);
 			sig=PTC[ip].sigs[iside]+dsig*isgn;
 			if(sig>=0.9){
@@ -533,7 +540,6 @@ int main(){
 		}
 		TK=KE/(1.5*prms.np*kb);
 		//if(i%100==0) printf("UE=%le, UH=%le, (UH/UE=%le)\n",UE,Uhyd,Uhyd/UE);
-
 
 		rev.smooth(Sab,TK,UE);
 		KE=KE/np*Na*1.e-03;

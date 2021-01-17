@@ -247,11 +247,13 @@ void REV :: setup(CNTRL prms, WALL wll){
 	bfyy=(double *)malloc(sizeof(double)*nave);
 	bfxy=(double *)malloc(sizeof(double)*nave);
 	bfT= (double *)malloc(sizeof(double)*nave);
+	bfU= (double *)malloc(sizeof(double)*nave);
 	for(i=0;i<nave;i++){
 		bfxx[i]=0.0;
 		bfyy[i]=0.0;
 		bfxy[i]=0.0;
 		bfT[i]=0.0;
+		bfU[i]=0.0;
 	};
 	ibf=0;
 

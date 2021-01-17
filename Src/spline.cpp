@@ -2,6 +2,13 @@
 #include <stdlib.h>
 #include "dem.h"
 ///////////////////////// Member Functions //////////////////////////////
+Curve2D::~Curve2D(){
+	/*
+	free(x); free(y); 
+	free(bx); free(cx); free(dx);
+	free(by); free(cy); free(dy);
+	*/
+};
 void Curve2D:: init(int N){
 	np=N;
 	x=(double *)malloc(sizeof(double)*np);
@@ -119,6 +126,13 @@ void Curve2D::spline(){
 		cy[i]=u0*0.5;
 		dy[i]=(u1-u0)/6.0;
 	}
+
+	free(px);
+	free(py);
+	free(B.A0);
+	free(B.A1);
+	free(B.A2);
+	free(B.y);
 }
 double Curve2D::intplx(double s){
 	int i=int(s);
@@ -259,4 +273,6 @@ void MatTriDiag::LinSolve(double *b1, double *b2){
 		b1[l]=sol1[l];
 		b2[l]=sol2[l];
 	}
+	free(sol1); 
+	free(sol2);
 };

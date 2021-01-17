@@ -208,6 +208,7 @@ double VDF(
 			if(PTC[ipt].ist==PTC[jpt].ist && idiff < ndiff) continue; 
 
 			dUE=LJ(PTC[ipt],PTC[jpt],dFn,sig,Eps,rev,iofst,jofst,dSab,3);
+//			printf("Fn=%le %le\n",dFn[0],dFn[1]);
 
 			UE+=dUE;
 			PTC[ipt].UE[isgn]+=dUE;
