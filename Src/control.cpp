@@ -105,6 +105,10 @@ void CNTRL :: load(char *fname){
 	fgets(cbff,128,fp);
 	fscanf(fp,"%d\n",&nave);
 	printf("nave=%d\n",nave);
+
+	fgets(cbff,128,fp);
+	fscanf(fp,"%lf\n",&mu);
+	printf("mu=%lf\n",mu);
 	fclose(fp);
 	
 

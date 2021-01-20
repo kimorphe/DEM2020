@@ -53,13 +53,39 @@ class PTCS:
 		self.y=y; #print("x=",x); input("pause")
 		self.irev=irev;
 		self.jrev=jrev;
-		self.sigp=sigp
-		self.sigm=sigm
+		self.sigp=np.array(sigp)
+		self.sigm=np.array(sigm)
 		self.Np=Np
 		fp.close();
+	def hist(self,ax):
+            sh=np.hstack([self.sigp,self.sigm])
+            sh-=0.9;
+            sh*=0.5;
+            ax.hist(sh,bins=25)
+            ax.grid(True)
+
 	def plot_w(self,ax):
-		ax.plot(self.sigp)
-		ax.plot(self.sigm)
+		lw=0.5
+		ax.plot( (self.sigp-0.9)*0.5,"-k",linewidth=lw)
+		ax.plot( (self.sigm-0.9)*0.5,"-k",linewidth=lw)
+		ax.grid(True)
+	def plot_w2(self,ax,nps):
+		clrs=["r","b","g","c","y","m","k"];
+		nclrs=len(clrs);
+		n1=0;
+		st=0;
+		for n in nps:
+                    n2=n1+n;
+                    sp=np.array(self.sigp[n1:n2])-0.9
+                    sm=np.array(self.sigm[n1:n2])-0.9
+                    sp*=0.5;
+                    sm*=0.5;
+                    num=np.arange(n1,n2,1)
+                    n1=n2
+                    cl=clrs[st%nclrs]
+                    ax.plot(num,sp,cl,linewidth=1.0)
+                    ax.plot(num,sm,"--"+cl,linewidth=1.0)
+                    st+=1
 		ax.grid(True)
 	def plot(self,ax,nps,Movie=False):
 		if Movie == False:
@@ -90,7 +116,7 @@ class PTCS:
 			m1=0;
 			for m2 in indx:
 				#plt2,=ax.plot(x[m1:m2],y[m1:m2],"-",color="skyblue",ms=2,lw=2);
-				plt,=ax.plot(x[m1:m2],y[m1:m2],"-"+clrs[st%nclrs],ms=2,lw=1);
+				plt,=ax.plot(x[m1:m2],y[m1:m2],"-"+clrs[st%nclrs],ms=2,lw=0.5);
 				plts.append(plt);
 				m1=m2;
 			n1=n2;
@@ -98,16 +124,32 @@ class PTCS:
 
 		return plts;
 if __name__=="__main__":
-    num=117
+
+    fig=plt.figure(figsize=[12,4])
+    ax=fig.add_subplot(111)
+
+    fp=open("ptc_nums.dat");
+    nums=fp.readlines();
+    nums=list(map(int,nums));
+
+    num=0
     args=sys.argv;
     narg=len(args)
     if narg >1:
         num=int(args[1])
     fname="x"+str(num)+".dat"
+
     ptc=PTCS(fname);
-    fig=plt.figure()
-    ax=fig.add_subplot(111)
+
     ptc.plot_w(ax)
-    ax.set_ylim([0.9,2.0])
+    ptc.plot_w2(ax,nums)
+
     print("sum(sig)=",np.sum(ptc.sigp)+np.sum(ptc.sigm)-ptc.Np*0.9*2)
+    ax.set_xlim([0,ptc.Np])
+    ax.set_ylim([0,0.5])
+    ax.tick_params(labelsize=14)
+
+    fig2=plt.figure()
+    ax2=fig2.add_subplot(111)
+    ptc.hist(ax2)
     plt.show()

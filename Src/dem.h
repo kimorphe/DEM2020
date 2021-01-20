@@ -98,6 +98,7 @@ class CNTRL{	// DEM implementation controle parameters
 		void print();		// print parameters	
 		double h0[2];		// subcell size (given)
 		double UE0;	// max hydration energy
+		double mu;
 	private:
 };
 class WALL{	// WALL configuration and movement 

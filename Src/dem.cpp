@@ -201,7 +201,8 @@ int move_water2(
 	}
 	return(nswap);
 };
-int add_water(
+//int add_water(
+double add_water(
 		PRTCL *PTC, // particles
 		double dsig, // variation in water 
 		double rmax, // radius of interaction circle 
@@ -224,10 +225,13 @@ int add_water(
 	double dUh;
 	double sig_now;
 	//for(ipt=0;ipt<2*np;ipt++){
-	double mu=0.2,dG;
+	double mu=0.1,dG;
+	//double mu=prms.mu;	This Does not work (not known why ?? 2021/01/20)
+	printf("mu=%lf, %lf\n",mu,prms.mu);
 	double sig0=0.9,sigb=1.1;
-	mu*=log(2.)/(sigb-sig0)*prms.UE0;
+	mu=prms.mu*log(2.)/(sigb-sig0)*prms.UE0;
 
+	double Gn=0.0;
 	for(ipt=0;ipt<nmc;ipt++){
 		irnd=RndI(mt);	
 		ip=irnd/2; // particle number
@@ -247,10 +251,13 @@ int add_water(
 				PTC[ip].sigs[iside]=sig;
 				if(isgn ==1) nadd++;
 				if(isgn ==-1) nadd--;
+				Gn+=dG;
 			}
 		}
 	}
-	return(nadd);
+	printf("Gn=%lf, nadd=%d ",Gn,nadd);
+//	return(nadd);
+	return(Gn);
 };
 
 int main(){
@@ -437,7 +444,7 @@ int main(){
 	for(j=0;j<npl;j++) fprintf(fpl_out,"%lf\n",PTC[indx[j]].sig);
 	for(j=0;j<npl;j++) fprintf(fpl_out,"%lf %lf\n",PTC[indx[j]].x[0],PTC[indx[j]].x[1]);
 
-	fprintf(ferg,"# time [ps], kinetic & potential energy [kJ/mol], Cell Size [nm], Temperature [K]\n");
+	fprintf(ferg,"# time [ps], kinetic & potential energy [kJ/mol], Cell Size [nm], Temperature [K], Uhyd, Gn\n");
 	fprintf(fstr,"# time [ps], Crystal consts:Wd[0],Wd[1][nm], Wd[2],Wd[3][rad], Stress [GPa]: Sxx, Syx, Syy \n");
 
 	double ds11,ds12,ds22;
@@ -455,6 +462,7 @@ int main(){
 	isds[0]=0; isds[1]=0;
 
 	SUBCELL *sbcll;
+	double Un=0.0,UnKJ;
 	for(i=1;i<=prms.Nt;i++){	// Time Step (START) 
 		//for(ist=0;ist<nst;ist++) st[ist].xy2crv(rev,PTC);
 		for(j=0;j<np;j++) PTC[j].scale(i,prms.dt,rev);
@@ -544,7 +552,13 @@ int main(){
 		rev.smooth(Sab,TK,UE);
 		KE=KE/np*Na*1.e-03;
 		UE=UE/np*Na*1.e-03; // [kJ/mol]
-		fprintf(ferg,"%le %le %le %le %le %le %le\n",i*prms.dt,KE,UE,rev.Wd[0],rev.Wd[1],TK,rev.Tb);
+		Uhyd=Uhyd*(2.*prms.Eps0);
+		UnKJ=Un*2.*prms.Eps0;
+		Uhyd=Uhyd/np*Na*1.e-03;
+		UnKJ=UnKJ/np*Na*1.e-03;
+
+
+		fprintf(ferg,"%le %le %le %le %le %le %le %le %le\n",i*prms.dt,KE,UE,rev.Wd[0],rev.Wd[1],TK,rev.Tb,Uhyd,UnKJ);
 		fprintf(fstr,"%le %le %le %le %le ",i*prms.dt,rev.Wd[0],rev.Wd[1],rev.Wd[2],rev.Wd[3]);
 		fprintf(fstr,"%le %le %le ",Sab[0][0]*m0,Sab[1][0]*m0,Sab[1][1]*m0);
 
@@ -556,8 +570,10 @@ int main(){
 		if(prms.mvw>0){
 			nswap=move_water2(PTC,0.03,3.5,sbcll,rev, prms);
 			if(prms.mvw==2 && i%10==1){
-				nadd=add_water(PTC,0.03,3.5,sbcll,rev, prms);
-				printf("nadd=%d\n",nadd);
+				//nadd=add_water(PTC,0.03,3.5,sbcll,rev, prms);
+				Un+=add_water(PTC,0.03,3.5,sbcll,rev, prms);
+				//printf("nadd=%d\n",nadd);
+				printf("Un=%le\n",Un);
 			};
 
 			for(ist=0;ist<nst;ist++) st[ist].wsmooth(rev,PTC);
