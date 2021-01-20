@@ -212,7 +212,7 @@ double add_water(
 ){
 	int np=prms.np;
 	int ipt,iside,isgn;
-	int nadd=0;
+	int nadd;
 	double dUE,sig;
 	std::random_device rd;
 	//std::mt19937 mt(rd());
@@ -225,13 +225,15 @@ double add_water(
 	double dUh;
 	double sig_now;
 	//for(ipt=0;ipt<2*np;ipt++){
-	double mu=0.1,dG;
+	double mu,dG;
 	//double mu=prms.mu;	This Does not work (not known why ?? 2021/01/20)
-	printf("mu=%lf, %lf\n",mu,prms.mu);
 	double sig0=0.9,sigb=1.1;
 	mu=prms.mu*log(2.)/(sigb-sig0)*prms.UE0;
 
-	double Gn=0.0;
+	static int Nadd=0;
+
+	double Gn;
+	Gn=0.0; nadd=0;
 	for(ipt=0;ipt<nmc;ipt++){
 		irnd=RndI(mt);	
 		ip=irnd/2; // particle number
@@ -255,7 +257,8 @@ double add_water(
 			}
 		}
 	}
-	printf("Gn=%lf, nadd=%d ",Gn,nadd);
+	Nadd+=nadd;
+	printf(" [dN=%d, DN=%d]",nadd,Nadd);
 //	return(nadd);
 	return(Gn);
 };
@@ -463,6 +466,7 @@ int main(){
 
 	SUBCELL *sbcll;
 	double Un=0.0,UnKJ;
+	double sig_tot;
 	for(i=1;i<=prms.Nt;i++){	// Time Step (START) 
 		//for(ist=0;ist<nst;ist++) st[ist].xy2crv(rev,PTC);
 		for(j=0;j<np;j++) PTC[j].scale(i,prms.dt,rev);
@@ -541,10 +545,13 @@ int main(){
 
 		KE=0.0;
 		Uhyd=0.0;
+		sig_tot=0.0;
 		for(j=0;j<np;j++){
 			KE+=PTC[j].KE(prms.m0);
 			Uhyd+=Uhyd_sig(prms.UE0,PTC[j].sigs[0]);
 			Uhyd+=Uhyd_sig(prms.UE0,PTC[j].sigs[1]);
+			sig_tot+=PTC[j].sigs[0];
+			sig_tot+=PTC[j].sigs[1];
 		}
 		TK=KE/(1.5*prms.np*kb);
 		//if(i%100==0) printf("UE=%le, UH=%le, (UH/UE=%le)\n",UE,Uhyd,Uhyd/UE);
@@ -553,8 +560,9 @@ int main(){
 		KE=KE/np*Na*1.e-03;
 		UE=UE/np*Na*1.e-03; // [kJ/mol]
 		Uhyd=Uhyd*(2.*prms.Eps0);
-		UnKJ=Un*2.*prms.Eps0;
 		Uhyd=Uhyd/np*Na*1.e-03;
+
+		UnKJ=Un*2.*prms.Eps0;
 		UnKJ=UnKJ/np*Na*1.e-03;
 
 
@@ -572,8 +580,8 @@ int main(){
 			if(prms.mvw==2 && i%10==1){
 				//nadd=add_water(PTC,0.03,3.5,sbcll,rev, prms);
 				Un+=add_water(PTC,0.03,3.5,sbcll,rev, prms);
-				//printf("nadd=%d\n",nadd);
-				printf("Un=%le\n",Un);
+				//printf("Un=%le\n",Un);
+				printf(" s_tot=%lf ",(sig_tot-0.9*np*2)*0.5);
 			};
 
 			for(ist=0;ist<nst;ist++) st[ist].wsmooth(rev,PTC);
@@ -633,7 +641,7 @@ int main(){
 					 PTC[j].v[1]*=Vfac;
 				}
 			}
-			printf(" Tb/Tset=%lf/%lf (Vfac=%lf)\n",rev.Tb,prms.Tset,Vfac);
+			printf("  Tb=%lf (Vfac=%lf)\n",rev.Tb,Vfac);
 			}
 		}
 
@@ -758,7 +766,7 @@ void save_ptc_data(
 	char fname[128];
 	sprintf(fname,"x%d.dat",isum);
 	join_chars(Dir,fname);
-	printf("%s ",fname);
+	printf("\n%s ",fname);
 	fp=fopen(fname,"w");
 	fprintf(fp,"# time [pico sec]\n");
 	fprintf(fp,"%lf\n",tt);

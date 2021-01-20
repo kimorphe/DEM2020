@@ -11,6 +11,7 @@ time=[]
 K=[]; P=[];
 T=[];
 W=[]; H=[];
+Uh=[]; Un=[];
 for row in fp:
 	try:
 		dat=list(map(float, row.strip().split(" ")));
@@ -19,6 +20,8 @@ for row in fp:
 		W.append(dat[3]);
 		P.append(dat[2]);
 		K.append(dat[1]);
+		Uh.append(dat[7]);
+		Un.append(dat[8]);
 		time.append(dat[0]);
 	except:
 		break;
@@ -73,8 +76,12 @@ ax3.set_ylabel("Stress [MPa]")
 
 fig2=plt.figure()
 ax2=fig2.add_subplot(111)
-ax2.plot(time,P)
+ax2.plot(time,P,label="LJ")
+ax2.plot(time,Uh,label="Hyd")
+ax2.plot(time,Un,label="G")
+ax2.plot(time,P+Uh+Un,label="total")
+ax2.legend()
 ax2.grid(True)
 ax2.set_xlabel("time");
-ax2.set_ylabel("Potential Energy");
+ax2.set_ylabel("Energy");
 plt.show()
