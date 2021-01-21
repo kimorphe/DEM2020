@@ -192,8 +192,10 @@ int move_water2(
 			iswap=0;
 			if(dUE < 0.0){
 			       	iswap=wswap(PTC,ipts,isds,dsig);
-				PTC[ipts[0]].UE[isds[0]]+=dUE_try[0];
-				PTC[ipts[1]].UE[isds[1]]+=dUE_try[1];
+				if(iswap==1){
+					PTC[ipts[0]].UE[isds[0]]+=dUE_try[0];
+					PTC[ipts[1]].UE[isds[1]]+=dUE_try[1];
+				}
 			}
 			nswap+=iswap;
 		}
@@ -301,6 +303,7 @@ int main(){
 	FILE *fp,*ftmp;
 	FILE *ferg=fopen(fnerg,"w");
 	FILE *fstr=fopen(fnstr,"w");
+	FILE *fsig=fopen("sig_sum.out","w");
 
 	double Sab[2][2],dS1[2][2],dS2[2][2];
 	double m0;
@@ -569,6 +572,8 @@ int main(){
 		fprintf(ferg,"%le %le %le %le %le %le %le %le %le\n",i*prms.dt,KE,UE,rev.Wd[0],rev.Wd[1],TK,rev.Tb,Uhyd,UnKJ);
 		fprintf(fstr,"%le %le %le %le %le ",i*prms.dt,rev.Wd[0],rev.Wd[1],rev.Wd[2],rev.Wd[3]);
 		fprintf(fstr,"%le %le %le ",Sab[0][0]*m0,Sab[1][0]*m0,Sab[1][1]*m0);
+
+		fprintf(fsig,"%le %le %le %le\n",i*prms.dt,Uhyd,UnKJ,(sig_tot-0.9*np*2)*0.5);
 
 		int nswap,il,ir,npt,nadd;
 		double sigb;
